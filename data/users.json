@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1780365895834,
+    "username": "ashishpoudel523",
+    "email": "ap@gmail.com",
+    "password": "$2a$10$vdqGzgL63JnaPpwTWm1kZuAmFbZhr8rpNjRNOpHIGRodCCzaVpV7a",
+    "address": "Kalanki",
+    "phone": "9876432365",
+    "gender": "male"
+  },
+  {
+    "id": 1780404612559,
+    "username": "developer123",
+    "email": "developer@gmail.com",
+    "password": "$2a$10$trFEwI.gTF6XTXbn5H4ZW.6ZBMuf3BchzGJlyjaqp137rMOE7nZvK",
+    "address": "Nepal",
+    "phone": "8767567656",
+    "gender": "female"
+  }
+]
