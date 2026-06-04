@@ -1,14 +1,37 @@
-const express = require("express");
-const cors = require("cors");
-const path = require("path");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+import express from "express";
+import cors from "cors";
+import path from "path";
+import fs from "fs";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { fileURLToPath } from "url";
+import { registerSchema, loginSchema } from "./validators/validatorSchema.js";
+
+function zodValidationError(error) {
+  const fieldErrors = {};
+  for (const issue of error.issues) {
+    const field = issue.path[0];
+    if (field && !fieldErrors[field]) {
+      fieldErrors[field] = issue.message;
+    }
+  }
+  return {
+    message: error.issues[0]?.message ?? "Validation failed.",
+    fieldErrors,
+  };
+}
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
-const JWT_SECRET = "my-secret-key-change-in-real-project";
+const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET
 const USERS_FILE = path.join(__dirname, "data", "users.json");
 
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
 
 function readUsers() {
   const data = fs.readFileSync(USERS_FILE, "utf-8");
@@ -19,41 +42,14 @@ function saveUsers(users) {
   fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
 }
 
-function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-function isValidPhone(phone) {
-  return /^[0-9]{10}$/.test(phone);
-}
-
-// Register new user
 app.post("/api/register", async (req, res) => {
-  const { username, email, password, address, phone, gender } = req.body;
+  const result = registerSchema.safeParse(req.body);
 
-  if (!username || username.trim().length < 3) {
-    return res.status(400).json({ message: "Username must be at least 3 characters." });
+  if (!result.success) {
+    return res.status(400).json(zodValidationError(result.error));
   }
 
-  if (!email || !isValidEmail(email)) {
-    return res.status(400).json({ message: "Please enter a valid email." });
-  }
-
-  if (!password || password.length < 6) {
-    return res.status(400).json({ message: "Password must be at least 6 characters." });
-  }
-
-  if (!address || address.trim().length < 3) {
-    return res.status(400).json({ message: "Please enter your address." });
-  }
-
-  if (!phone || !isValidPhone(phone)) {
-    return res.status(400).json({ message: "Phone must be 10 digits." });
-  }
-
-  if (!gender) {
-    return res.status(400).json({ message: "Please select your gender." });
-  }
+  const { username, email, password, address, phone, gender } = result.data;
 
   const users = readUsers();
   const emailExists = users.find((user) => user.email === email.toLowerCase());
@@ -66,11 +62,11 @@ app.post("/api/register", async (req, res) => {
 
   const newUser = {
     id: Date.now(),
-    username: username.trim(),
-    email: email.toLowerCase().trim(),
+    username,
+    email: email.toLowerCase(),
     password: hashedPassword,
-    address: address.trim(),
-    phone: phone.trim(),
+    address,
+    phone,
     gender,
   };
 
@@ -80,20 +76,17 @@ app.post("/api/register", async (req, res) => {
   res.status(201).json({ message: "Registration successful! You can login now." });
 });
 
-// Login user
 app.post("/api/login", async (req, res) => {
-  const { email, password } = req.body;
+  const result = loginSchema.safeParse(req.body);
 
-  if (!email || !isValidEmail(email)) {
-    return res.status(400).json({ message: "Please enter a valid email." });
+  if (!result.success) {
+    return res.status(400).json(zodValidationError(result.error));
   }
 
-  if (!password) {
-    return res.status(400).json({ message: "Please enter your password." });
-  }
+  const { email, password } = result.data;
 
   const users = readUsers();
-  const user = users.find((item) => item.email === email.toLowerCase().trim());
+  const user = users.find((item) => item.email === email.toLowerCase());
 
   if (!user) {
     return res.status(401).json({ message: "Invalid email or password." });
@@ -121,7 +114,6 @@ app.post("/api/login", async (req, res) => {
   });
 });
 
-// Protected route example (shows JWT works)
 app.get("/api/profile", (req, res) => {
   const authHeader = req.headers.authorization;
 
@@ -140,5 +132,5 @@ app.get("/api/profile", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log("Server running at http://localhost:" + PORT);
+  console.log(`Server running at http://localhost:${PORT}`);
 });

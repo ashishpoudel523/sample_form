@@ -1,0 +1,42 @@
+import { z } from "zod";
+
+export const registerSchema = z.object({
+  username: z
+    .string()
+    .min(1, "Username is required.")
+    .trim()
+    .min(3, "Username must be at least 3 characters."),
+  email: z
+    .string()
+    .min(1, "Email is required.")
+    .trim()
+    .email("Please enter a valid email."),
+  password: z
+    .string()
+    .min(1, "Password is required.")
+    .min(6, "Password must be at least 6 characters."),
+  address: z
+    .string()
+    .min(1, "Address is required.")
+    .trim()
+    .min(3, "Please enter your address."),
+  phone: z
+    .string()
+    .min(1, "Phone is required.")
+    .trim()
+    .regex(/^[0-9]{10}$/, "Phone must be 10 digits."),
+  gender: z.enum(["male", "female", "other"], {
+    message: "Please select your gender.",
+  }),
+});
+
+export const loginSchema = z.object({
+  email: z
+    .string()
+    .min(1, "Email is required.")
+    .trim()
+    .email("Please enter a valid email."),
+  password: z.string().min(1, "Please enter your password."),
+});
+
+

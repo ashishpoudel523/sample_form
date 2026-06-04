@@ -16,5 +16,14 @@
     "address": "Nepal",
     "phone": "8767567656",
     "gender": "female"
+  },
+  {
+    "id": 1780578590463,
+    "username": "programmer",
+    "email": "pro@gmail.com",
+    "password": "$2a$10$SnOmKKd6KM2M5S7EpBTEl.hnCPf0Nn1HomNKtPwj.4zUadqLDDrQG",
+    "address": "asd",
+    "phone": "8685766576",
+    "gender": "male"
   }
 ]
