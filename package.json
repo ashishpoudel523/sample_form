@@ -5,13 +5,21 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "node --experimental-strip-types server.js",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
+    "@prisma/adapter-mariadb": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
     "express": "^4.21.2",
-    "jsonwebtoken": "^9.0.2",
+    "mariadb": "^3.5.2",
     "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "prisma": "^7.8.0"
   }
 }
